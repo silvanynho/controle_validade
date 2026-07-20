@@ -1,0 +1,11 @@
+workflows:
+  android-apk:
+    name: Gerar APK Android
+    environment:
+      flutter: 3.19.0
+    scripts:
+      - flutter pub get
+      - flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      
