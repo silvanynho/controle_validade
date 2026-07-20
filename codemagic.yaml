@@ -1,11 +1,12 @@
 workflows:
   android-apk:
-    name: Gerar APK Atualizado
+    name: Gerar APK Final
     environment:
       flutter: 3.22.0
     scripts:
       - flutter pub get
+      - rm -rf android
+      - flutter create --platforms=android .
       - flutter build apk --release
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
-      
