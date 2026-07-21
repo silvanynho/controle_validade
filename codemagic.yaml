@@ -7,7 +7,7 @@ workflows:
       - flutter clean
       - flutter pub get
       - flutter create --platforms=android --no-overwrite .
-      - sed -i.bak 's/minSdkVersion 19/minSdkVersion 20/g' android/app/build.gradle
+      - echo "minSdkVersion=20" >> android/app/gradle.properties
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
