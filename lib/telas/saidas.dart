@@ -18,8 +18,8 @@ class _TelaSaidaState extends State<TelaSaida> {
 
   Future<void> _escanearCodigo() async {
     try {
-      var resultado = await BarcodeScanner.scan();
-      if (resultado.raw.isNotEmpty) {
+      final resultado = await BarcodeScanner.scan();
+      if (resultado.rawContent.isNotEmpty) {
         setState(() => _codigo.text = resultado.rawContent);
         _buscarProduto();
       }
