@@ -2,11 +2,12 @@ workflows:
   android-apk:
     name: Gerar APK Final
     environment:
-      flutter: 3.22.0
+      flutter: 3.19.0
     scripts:
       - flutter pub get
       - rm -rf android
-      - flutter create --platforms=android .
-      - flutter build apk --release
+      - flutter create --platforms=android --no-overwrite lib/main.dart .
+      - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
+      
