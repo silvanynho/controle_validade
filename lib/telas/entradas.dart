@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 
 class TelaEntrada extends StatefulWidget {
   const TelaEntrada({super.key});
@@ -15,9 +15,17 @@ class _TelaEntradaState extends State<TelaEntrada> {
   final _codigo = TextEditingController();
   final _lote = TextEditingController();
   final _quantidade = TextEditingController();
-  final qrKey = GlobalKey(debugLabel: 'QR');
-  bool _escaneando = false;
   DocumentSnapshot? _produtoEncontrado;
+
+  Future<void> _escanearCodigo() async {
+    try {
+      var resultado = await BarcodeScanner.scan();
+      if (resultado.raw.isNotEmpty) {
+        setState(() => _codigo.text = resultado.raw);
+        _buscarProduto();
+      }
+    } catch (_) {}
+  }
 
   Future<void> _buscarProduto() async {
     if (_codigo.text.trim().isEmpty) return;
@@ -66,9 +74,7 @@ class _TelaEntradaState extends State<TelaEntrada> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Entrada registrada com sucesso!'), backgroundColor: Colors.green)
       );
-      _codigo.clear();
-      _lote.clear();
-      _quantidade.clear();
+      _codigo.clear(); _lote.clear(); _quantidade.clear();
       setState(() => _produtoEncontrado = null);
     }
   }
@@ -86,10 +92,7 @@ class _TelaEntradaState extends State<TelaEntrada> {
                 Expanded(
                   child: TextField(
                     controller: _codigo,
-                    decoration: const InputDecoration(
-                      labelText: 'Código de Barras',
-                      border: OutlineInputBorder()
-                    ),
+                    decoration: const InputDecoration(labelText: 'Código de Barras', border: OutlineInputBorder())
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -100,30 +103,11 @@ class _TelaEntradaState extends State<TelaEntrada> {
                 ),
                 IconButton.filled(
                   icon: const Icon(Icons.qr_code_scanner),
-                  onPressed: () => setState(() => _escaneando = true),
+                  onPressed: _escanearCodigo,
                   style: IconButton.styleFrom(backgroundColor: Colors.green),
                 ),
               ],
             ),
-            if (_escaneando)
-              SizedBox(
-                height: 200,
-                child: QRView(
-                  key: qrKey,
-                  onQRViewCreated: (controlador) {
-                    controlador.scannedDataStream.listen((leitura) {
-                      if (leitura.code != null) {
-                        _codigo.text = leitura.code!;
-                        setState(() {
-                          _escaneando = false;
-                          controlador.dispose();
-                        });
-                        _buscarProduto();
-                      }
-                    });
-                  },
-                ),
-              ),
             const SizedBox(height: 12),
             if (_produtoEncontrado != null)
               Container(
@@ -155,10 +139,7 @@ class _TelaEntradaState extends State<TelaEntrada> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _registrarEntrada,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical:14),
-                  backgroundColor: Colors.green
-                ),
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical:14), backgroundColor: Colors.green),
                 child: const Text('Registrar Entrada', style: TextStyle(fontSize: 18)),
               ),
             )
