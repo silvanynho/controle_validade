@@ -21,7 +21,7 @@ class _TelaEntradaState extends State<TelaEntrada> {
     try {
       var resultado = await BarcodeScanner.scan();
       if (resultado.raw.isNotEmpty) {
-        setState(() => _codigo.text = resultado.raw);
+        setState(() => _codigo.text = resultado.text);
         _buscarProduto();
       }
     } catch (_) {}
