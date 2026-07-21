@@ -13,10 +13,10 @@ dependencies:
 
   cupertino_icons: ^1.0.6
 
-  # Firebase
-  firebase_core: ^2.30.1
-  firebase_auth: ^4.19.5
-  cloud_firestore: ^4.17.0
+  # Firebase (Versões compatíveis com Dart 3.2.x e web 0.3.0)
+  firebase_core: 2.27.0
+  firebase_auth: 4.17.8
+  cloud_firestore: 4.15.8
 
   # Scanner (compatível com Flutter 3.16)
   mobile_scanner: 4.0.1
@@ -27,7 +27,9 @@ dependencies:
   excel: ^4.0.2
   path_provider: ^2.1.2
   open_file: ^3.3.2
-  url_launcher: ^6.2.5
+  
+  # URL Launcher (Versão estável compatível com Dart 3.2.x)
+  url_launcher: 6.2.4
 
 flutter:
   uses-material-design: true
