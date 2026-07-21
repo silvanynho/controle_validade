@@ -1,35 +1,24 @@
 name: nutri_control
 description: Nutri Control - Controle inteligente de estoque e validade
-publish_to: "none"
-
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
+  sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-
-  cupertino_icons: ^1.0.6
-
-  # Firebase (Versões compatíveis com Dart 3.2.x e web 0.3.0)
-  firebase_core: 2.27.0
-  firebase_auth: 4.17.8
-  cloud_firestore: 4.15.8
-
-  # Scanner (compatível com Flutter 3.16)
-  mobile_scanner: 4.0.1
-
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.1
+  cloud_firestore: ^4.13.6
+  mobile_scanner: ^3.5.5
   intl: ^0.19.0
-  flutter_local_notifications: ^17.1.2
-  pdf: ^3.10.8
-  excel: ^4.0.2
-  path_provider: ^2.1.2
+  flutter_local_notifications: ^16.3.2
+  pdf: ^3.10.7
+  excel: ^3.0.0
+  path_provider: ^2.1.1
   open_file: ^3.3.2
-  
-  # URL Launcher (Versão estável compatível com Dart 3.2.x)
-  url_launcher: 6.2.4
+  url_launcher: ^6.1.14
 
 flutter:
   uses-material-design: true
