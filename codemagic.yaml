@@ -8,7 +8,7 @@ workflows:
       - flutter pub get
       - flutter create --platforms=android --no-overwrite .
       - echo "minSdkVersion=20" >> android/app/gradle.properties
-      - sed -i.bak 's|<manifest|<manifest>\n<uses-permission android:name="android.permission.CAMERA"/>\n<uses-feature android:name="android.hardware.camera" android:required="false"/>\n<uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>|g' android/app/src/main/AndroidManifest.xml
+      - echo "compileSdkVersion=34" >> android/app/gradle.properties
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
