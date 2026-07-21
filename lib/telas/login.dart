@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dashboard.dart';
 
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -13,260 +11,110 @@ class TelaLogin extends StatefulWidget {
 class _TelaLoginState extends State<TelaLogin> {
   final _email = TextEditingController();
   final _senha = TextEditingController();
-  
-  // Instanciamos apenas quando necessário, evitando quebrar a árvore de componentes
-  FirebaseAuth get _auth => FirebaseAuth.instance;
-  bool _carregando = false;
+  bool _senhaVisivel = false; // Controla mostrar/esconder
+  bool _modoCadastro = false;
 
-  @override
-  void dispose() {
-    _email.dispose();
-    _senha.dispose();
-    super.dispose();
-  }
-
-  Future<void> _entrar() async {
-    setState(() => _carregando = true);
+  Future<void> _fazerAcao() async {
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: _email.text.trim(),
-        password: _senha.text.trim(),
-      );
+      if (_modoCadastro) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _email.text.trim(),
+          password: _senha.text.trim(),
+        );
+      } else {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _email.text.trim(),
+          password: _senha.text.trim(),
+        );
+      }
       if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Dashboard()));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_modoCadastro ? 'Cadastro feito!' : 'Bem-vindo!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Coloque aqui a navegação para a tela inicial
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Erro ao acessar'))
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro de conexão com o servidor: $e'))
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _carregando = false);
-    }
-  }
-
-  Future<void> _recuperarSenha() async {
-    if (_email.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Digite seu e-mail primeiro'))
-      );
-      return;
-    }
-    try {
-      await _auth.sendPasswordResetEmail(email: _email.text.trim());
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Link de recuperação enviado! Verifique sua caixa de entrada.'))
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e'))
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white, // Força o fundo branco para evitar reflexos da tela cinza nativa
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.inventory_2, size: 90, color: Colors.green),
-              const SizedBox(height: 16),
-              const Text(
-                'Nutri Control',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green)
-              ),
-              const Text(
-                'Controle inteligente de estoque e validade',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey)
-              ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'E-mail',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email)
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _senha,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Senha',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock)
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: _recuperarSenha,
-                  child: const Text('Esqueceu a senha?')
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _carregando ? null : _entrar,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: _carregando
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : const Text('Entrar', style: TextStyle(fontSize: 18)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CadastrarUsuario())),
-                child: const Text('Cadastrar novo usuário', style: TextStyle(fontSize: 16))
-              )
-            ],
+          SnackBar(
+            content: Text(e.message ?? 'Erro ao acessar'),
+            backgroundColor: Colors.red,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class CadastrarUsuario extends StatefulWidget {
-  const CadastrarUsuario({super.key});
-
-  @override
-  State<CadastrarUsuario> createState() => _CadastrarUsuarioState();
-}
-
-class _CadastrarUsuarioState extends State<CadastrarUsuario> {
-  final _nome = TextEditingController();
-  final _email = TextEditingController();
-  final _senha = TextEditingController();
-  String _nivelAcesso = 'Operador';
-  
-  // Protegendo as chamadas do Firebase aqui também
-  FirebaseAuth get _auth => FirebaseAuth.instance;
-  FirebaseFirestore get _db => FirebaseFirestore.instance;
-  bool _carregando = false;
-
-  @override
-  void dispose() {
-    _nome.dispose();
-    _email.dispose();
-    _senha.dispose();
-    super.dispose();
-  }
-
-  Future<void> _cadastrar() async {
-    if (_nome.text.trim().isEmpty || _email.text.trim().isEmpty || _senha.text.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos (senha mínimo 6 caracteres)'))
-      );
-      return;
-    }
-    setState(() => _carregando = true);
-    try {
-      final usuario = await _auth.createUserWithEmailAndPassword(
-        email: _email.text.trim(),
-        password: _senha.text.trim()
-      );
-      await _db.collection('usuarios').doc(usuario.user!.uid).set({
-        'nome': _nome.text.trim(),
-        'email': _email.text.trim(),
-        'nivel_acesso': _nivelAcesso,
-        'ativo': true,
-        'data_cadastro': FieldValue.serverTimestamp()
-      });
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao cadastrar: $e'))
         );
       }
-    } finally {
-      if (mounted) setState(() => _carregando = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cadastrar Usuário'), backgroundColor: Colors.green),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+      appBar: AppBar(
+        title: Text(_modoCadastro ? 'Cadastro' : 'Login'),
+        backgroundColor: Colors.green,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
-              controller: _nome,
-              decoration: const InputDecoration(labelText: 'Nome Completo', border: OutlineInputBorder())
-            ),
-            const SizedBox(height: 12),
-            TextField(
               controller: _email,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'E-mail', border: OutlineInputBorder())
+              decoration: const InputDecoration(
+                labelText: 'E-mail',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 12),
+            // CAMPO COM BOTÃO DE VER SENHA
             TextField(
               controller: _senha,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Senha', border: OutlineInputBorder())
+              obscureText: !_senhaVisivel, // Esconde ou mostra
+              decoration: InputDecoration(
+                labelText: 'Senha',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _senhaVisivel ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.green,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _senhaVisivel = !_senhaVisivel;
+                    });
+                  },
+                ),
+              ),
             ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField(
-              value: _nivelAcesso,
-              decoration: const InputDecoration(labelText: 'Nível de Acesso', border: OutlineInputBorder()),
-              items: const [
-                DropdownMenuItem(value: 'Administrador', child: Text('Administrador')),
-                DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
-                DropdownMenuItem(value: 'Operador', child: Text('Operador'))
-              ],
-              onChanged: (valor) => setState(() => _nivelAcesso = valor.toString())
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _carregando ? null : _cadastrar,
+                onPressed: _fazerAcao,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14), 
+                  padding: const EdgeInsets.all(14),
                   backgroundColor: Colors.green,
-                  foregroundColor: Colors.white
                 ),
-                child: _carregando
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                    )
-                  : const Text('Cadastrar', style: TextStyle(fontSize: 18))
+                child: Text(
+                  _modoCadastro ? 'Cadastrar' : 'Entrar',
+                  style: const TextStyle(fontSize: 18),
+                ),
               ),
-            )
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _modoCadastro = !_modoCadastro;
+                });
+              },
+              child: Text(
+                _modoCadastro
+                    ? 'Já tem conta? Entrar'
+                    : 'Não tem conta? Cadastre-se',
+              ),
+            ),
           ],
         ),
       ),
