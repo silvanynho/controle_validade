@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'telas/login.dart';
 
-// ESSA PARTE É OBRIGATÓRIA E ESTAVA FALTANDO!
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -17,10 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Nutri Control',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.green),
       home: const TelaLogin(),
     );
   }
