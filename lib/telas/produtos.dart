@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 
 class TelaProdutos extends StatefulWidget {
   const TelaProdutos({super.key});
@@ -19,8 +19,15 @@ class _TelaProdutosState extends State<TelaProdutos> {
   final _quantidade = TextEditingController();
   DateTime? _validade;
   final _formKey = GlobalKey<FormState>();
-  final qrKey = GlobalKey(debugLabel: 'QR');
-  bool _escaneando = false;
+
+  Future<void> _escanearCodigo() async {
+    try {
+      var resultado = await BarcodeScanner.scan();
+      if (resultado.raw.isNotEmpty) {
+        setState(() => _codigo.text = resultado.raw);
+      }
+    } catch (_) {}
+  }
 
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate() || _validade == null) return;
@@ -33,7 +40,9 @@ class _TelaProdutosState extends State<TelaProdutos> {
       'validade': Timestamp.fromDate(_validade!),
       'data_cadastro': FieldValue.serverTimestamp()
     });
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produto cadastrado!'), backgroundColor: Colors.green));
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Produto cadastrado!'), backgroundColor: Colors.green)
+    );
     _limpar();
   }
 
@@ -52,31 +61,66 @@ class _TelaProdutosState extends State<TelaProdutos> {
           key: _formKey,
           child: Column(
             children: [
-              Row(children: [
-                Expanded(child: TextFormField(controller: _codigo, decoration: const InputDecoration(labelText: 'Código', border: OutlineInputBorder()))),
-                IconButton(icon: const Icon(Icons.qr_code_scanner, size: 32), onPressed: () => setState(() => _escaneando = !_escaneando))
-              ]),
-              if (_escaneando) SizedBox(height: 200, child: QRView(key: qrKey, onQRViewCreated: (ctrl) {
-                ctrl.scannedDataStream.listen((d) { if(d.code!=null) setState(() { _codigo.text=d.code!; _escaneando=false; ctrl.dispose(); }); });
-              })),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _codigo,
+                      decoration: const InputDecoration(labelText: 'Código', border: OutlineInputBorder())
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_scanner, size: 32, color: Colors.green),
+                    onPressed: _escanearCodigo
+                  )
+                ],
+              ),
               const SizedBox(height: 12),
-              TextFormField(controller: _lote, decoration: const InputDecoration(labelText: 'Lote', border: OutlineInputBorder())),
+              TextFormField(
+                controller: _lote,
+                decoration: const InputDecoration(labelText: 'Lote', border: OutlineInputBorder())
+              ),
               const SizedBox(height: 12),
-              TextFormField(controller: _marca, decoration: const InputDecoration(labelText: 'Marca', border: OutlineInputBorder())),
+              TextFormField(
+                controller: _marca,
+                decoration: const InputDecoration(labelText: 'Marca', border: OutlineInputBorder())
+              ),
               const SizedBox(height: 12),
-              TextFormField(controller: _fornecedor, decoration: const InputDecoration(labelText: 'Fornecedor', border: OutlineInputBorder())),
+              TextFormField(
+                controller: _fornecedor,
+                decoration: const InputDecoration(labelText: 'Fornecedor', border: OutlineInputBorder())
+              ),
               const SizedBox(height: 12),
-              TextFormField(controller: _quantidade, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Quantidade', border: OutlineInputBorder())),
+              TextFormField(
+                controller: _quantidade,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Quantidade', border: OutlineInputBorder())
+              ),
               const SizedBox(height: 12),
               InkWell(
                 onTap: () async {
-                  final d = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime(2035));
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2035)
+                  );
                   if(d!=null) setState(() => _validade = d);
                 },
-                child: InputDecorator(decoration: const InputDecoration(labelText: 'Validade', border: OutlineInputBorder()), child: Text(_validade==null?'Selecione...':DateFormat('dd/MM/yyyy').format(_validade!)))
+                child: InputDecorator(
+                  decoration: const InputDecoration(labelText: 'Validade', border: OutlineInputBorder()),
+                  child: Text(_validade==null?'Selecione...':DateFormat('dd/MM/yyyy').format(_validade!))
+                )
               ),
               const SizedBox(height: 20),
-              SizedBox(width: double.infinity, child: ElevatedButton(onPressed: _salvar, style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(14), backgroundColor: Colors.green), child: const Text('Cadastrar', style: TextStyle(fontSize: 18))))
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _salvar,
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(14), backgroundColor: Colors.green),
+                  child: const Text('Cadastrar', style: TextStyle(fontSize: 18))
+                )
+              )
             ],
           ),
         ),
