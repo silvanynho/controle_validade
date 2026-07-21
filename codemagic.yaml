@@ -4,10 +4,8 @@ workflows:
     environment:
       flutter: 3.22.0
     scripts:
-      - rm -rf android
-      - flutter create --platforms=android --no-overwrite .
       - flutter pub get
-      - chmod +x android/gradlew
-      - flutter build apk --release --no-tree-shake-icons
+      - flutter build apk --release --no-tree-shake-icons --no-shrink
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
+      
