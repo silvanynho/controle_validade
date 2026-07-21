@@ -7,8 +7,6 @@ workflows:
       - flutter clean
       - flutter pub get
       - flutter create --platforms=android --no-overwrite .
-      - sed -i 's/compileSdkVersion 33/compileSdkVersion 34/g' android/app/build.gradle
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
-      
