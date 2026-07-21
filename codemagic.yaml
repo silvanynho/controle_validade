@@ -4,9 +4,10 @@ workflows:
     environment:
       flutter: 3.19.0
     scripts:
-      - flutter pub get
       - rm -rf android
       - flutter create --platforms=android --no-overwrite lib/main.dart .
+      - flutter pub get
+      - chmod +x android/gradlew
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
