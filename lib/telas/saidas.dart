@@ -20,7 +20,7 @@ class _TelaSaidaState extends State<TelaSaida> {
     try {
       var resultado = await BarcodeScanner.scan();
       if (resultado.raw.isNotEmpty) {
-        setState(() => _codigo.text = resultado.text);
+        setState(() => _codigo.text = resultado.rawContent);
         _buscarProduto();
       }
     } catch (_) {}
