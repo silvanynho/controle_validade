@@ -123,7 +123,12 @@ class _TelaProdutosState extends State<TelaProdutos> {
               }, decoration: const InputDecoration(labelText: 'Data Fabricação', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today))),
               const SizedBox(height: 8),
               TextField(controller: _validade, readOnly: true, onTap: () async {
-                final d = await showDatePicker(context: initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime(2035));
+             final d = await showDatePicker(
+  context: context,
+  initialDate: DateTime.now(),
+  firstDate: DateTime.now(),
+  lastDate: DateTime(2035)
+);
                 if (d != null) setModal(() { _dataVal = d; _validade.text = DateFormat('dd/MM/yyyy').format(d); });
               }, decoration: const InputDecoration(labelText: 'Data Validade *', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today))),
               const SizedBox(height: 8),
