@@ -13,7 +13,9 @@ class TelaLogin extends StatefulWidget {
 class _TelaLoginState extends State<TelaLogin> {
   final _email = TextEditingController();
   final _senha = TextEditingController();
-  final _auth = FirebaseAuth.instance;
+  
+  // Instanciamos apenas quando necessário, evitando quebrar a árvore de componentes
+  FirebaseAuth get _auth => FirebaseAuth.instance;
   bool _carregando = false;
 
   @override
@@ -37,6 +39,12 @@ class _TelaLoginState extends State<TelaLogin> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.message ?? 'Erro ao acessar'))
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro de conexão com o servidor: $e'))
         );
       }
     } finally {
@@ -70,6 +78,7 @@ class _TelaLoginState extends State<TelaLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Força o fundo branco para evitar reflexos da tela cinza nativa
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -122,7 +131,7 @@ class _TelaLoginState extends State<TelaLogin> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white, // Garante que o texto/indicador fique branco
+                    foregroundColor: Colors.white,
                   ),
                   child: _carregando
                     ? const SizedBox(
@@ -158,8 +167,10 @@ class _CadastrarUsuarioState extends State<CadastrarUsuario> {
   final _email = TextEditingController();
   final _senha = TextEditingController();
   String _nivelAcesso = 'Operador';
-  final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
+  
+  // Protegendo as chamadas do Firebase aqui também
+  FirebaseAuth get _auth => FirebaseAuth.instance;
+  FirebaseFirestore get _db => FirebaseFirestore.instance;
   bool _carregando = false;
 
   @override
