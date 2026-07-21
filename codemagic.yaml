@@ -1,11 +1,10 @@
 workflows:
   android-apk:
-    name: APK Final
+    name: Nutri Control APK
     environment:
-      flutter: 3.16.9
+      flutter: 3.22.0
     scripts:
       - flutter pub get
-      - flutter build apk --release --no-tree-shake-icons
+      - flutter build apk --release
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
-      
