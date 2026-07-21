@@ -16,6 +16,13 @@ class _TelaLoginState extends State<TelaLogin> {
   final _auth = FirebaseAuth.instance;
   bool _carregando = false;
 
+  @override
+  void dispose() {
+    _email.dispose();
+    _senha.dispose();
+    super.dispose();
+  }
+
   Future<void> _entrar() async {
     setState(() => _carregando = true);
     try {
@@ -114,11 +121,16 @@ class _TelaLoginState extends State<TelaLogin> {
                   onPressed: _carregando ? null : _entrar,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.green
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white, // Garante que o texto/indicador fique branco
                   ),
                   child: _carregando
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Entrar', style: TextStyle(fontSize: 18, color: Colors.white))
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text('Entrar', style: TextStyle(fontSize: 18)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -149,6 +161,14 @@ class _CadastrarUsuarioState extends State<CadastrarUsuario> {
   final _auth = FirebaseAuth.instance;
   final _db = FirebaseFirestore.instance;
   bool _carregando = false;
+
+  @override
+  void dispose() {
+    _nome.dispose();
+    _email.dispose();
+    _senha.dispose();
+    super.dispose();
+  }
 
   Future<void> _cadastrar() async {
     if (_nome.text.trim().isEmpty || _email.text.trim().isEmpty || _senha.text.length < 6) {
@@ -222,10 +242,18 @@ class _CadastrarUsuarioState extends State<CadastrarUsuario> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _carregando ? null : _cadastrar,
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical:14), backgroundColor: Colors.green),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14), 
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white
+                ),
                 child: _carregando
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Cadastrar', style: TextStyle(fontSize: 18, color: Colors.white))
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Text('Cadastrar', style: TextStyle(fontSize: 18))
               ),
             )
           ],
