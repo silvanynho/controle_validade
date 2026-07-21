@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class TelaSaida extends StatefulWidget {
   const TelaSaida({super.key});
@@ -14,6 +14,7 @@ class _TelaSaidaState extends State<TelaSaida> {
   final db = FirebaseFirestore.instance;
   final _codigo = TextEditingController();
   final _quantidade = TextEditingController();
+  final qrKey = GlobalKey(debugLabel: 'QR');
   bool _escaneando = false;
   DocumentSnapshot? _produtoEncontrado;
 
@@ -111,13 +112,19 @@ class _TelaSaidaState extends State<TelaSaida> {
             if (_escaneando)
               SizedBox(
                 height: 200,
-                child: MobileScanner(
-                  onDetect: (captura) {
-                    if (captura.barcodes.isNotEmpty) {
-                      _codigo.text = captura.barcodes.first.rawValue ?? '';
-                      setState(() => _escaneando = false);
-                      _buscarProduto();
-                    }
+                child: QRView(
+                  key: qrKey,
+                  onQRViewCreated: (controlador) {
+                    controlador.scannedDataStream.listen((leitura) {
+                      if (leitura.code != null) {
+                        _codigo.text = leitura.code!;
+                        setState(() {
+                          _escaneando = false;
+                          controlador.dispose();
+                        });
+                        _buscarProduto();
+                      }
+                    });
                   },
                 ),
               ),
