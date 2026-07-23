@@ -11,6 +11,8 @@ workflows:
       - echo "compileSdkVersion=34" >> android/app/gradle.properties
       - cp google-services.json android/app/
       - sed -i.bak '/<manifest/a <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
+      - echo "=== SUA CHAVE SHA-1 ABAIXO ==="
+      - keytool -list -v -keystore /Users/builder/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
