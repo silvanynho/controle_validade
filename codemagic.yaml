@@ -10,8 +10,14 @@ workflows:
       - echo "minSdkVersion=20" >> android/app/gradle.properties
       - echo "compileSdkVersion=34" >> android/app/gradle.properties
       - cp google-services.json android/app/
-      - sed -i.bak '/<manifest/a <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
-      - echo "=== SUA CHAVE SHA-1 ABAIXO ==="
+      # Adiciona permissão de internet de forma segura
+      - cat > permissao.txt << 'EOF'
+<manifest>
+<uses-permission android:name="android.permission.INTERNET" />
+EOF
+      - sed -i.bak 's|<manifest>|cat permissao.txt|e' android/app/src/main/AndroidManifest.xml
+      # Mostra a chave SHA-1 no log
+      - echo "=== CHAVE SHA-1 ABAIXO ==="
       - keytool -list -v -keystore /Users/builder/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
