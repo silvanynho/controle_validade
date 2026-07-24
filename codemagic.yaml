@@ -10,8 +10,30 @@ workflows:
       - echo "minSdkVersion=20" >> android/app/gradle.properties
       - echo "compileSdkVersion=34" >> android/app/gradle.properties
       - cp -f google-services.json android/app/
-      # Adiciona permissão de internet de forma segura
-      - sed -i.bak 's|<manifest|<manifest>\n<uses-permission android:name="android.permission.INTERNET"/>|' android/app/src/main/AndroidManifest.xml
+      # Adiciona permissão de internet de forma segura, sem quebrar o XML
+      - cat > android/app/src/main/AndroidManifest.xml << 'MANIFESTEOF'
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.nutri_control">
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <application
+    android:label="Nutri Control"
+    android:name="${applicationName}"
+    android:icon="@mipmap/ic_launcher">
+    <activity
+      android:name=".MainActivity"
+      android:exported="true"
+      android:launchMode="singleTop"
+      android:theme="@style/LaunchTheme"
+      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+      android:hardwareAccelerated="true"
+      android:windowSoftInputMode="adjustResize">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+  </application>
+</manifest>
+MANIFESTEOF
       - flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
