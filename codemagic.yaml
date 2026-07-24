@@ -6,10 +6,7 @@ workflows:
     scripts:
       - flutter clean
       - flutter pub get
-      # GERAR ESTRUTURA NOVA COMPLETA (SEM --no-overwrite) → ATIVA EMBEDDING V2 AUTOMATICAMENTE
       - flutter create --platforms=android .
-      # RESTAURA O NOSSO ARQUIVO COM PERMISSÃO DE INTERNET
-      - cp -f android/app/src/main/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
       - echo "minSdkVersion=20" >> android/app/gradle.properties
       - echo "compileSdkVersion=34" >> android/app/gradle.properties
       - cp -f google-services.json android/app/
